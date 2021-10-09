@@ -2,25 +2,16 @@
 
     <h2 class="is-bold">Add bookmark</h2>
 
-    <form #form="ngForm" (ngSubmit)="onFormSubmit(form)">
+    <form #form="ngForm" ngNativeValidate (ngSubmit)="onFormSubmit(form)">
         <div class="form-field">
             <label for="name" class="form-label">Name</label>
-            <input class="textbox" ngModel #textField="ngModel" name="name" type="text"
-                placeholder="Enter bookmark name..." required minlength="3">
-            <ng-container *ngIf="showValidationErrors && textField.invalid">
-                <p *ngIf="textField.errors?.required">Please enter some text for this bookmark.</p>
-                <p *ngIf="textField.errors?.minlength">The Todo text must be at least three characters</p>
-            </ng-container>
+            <input class="textbox" ngModel #textField="ngModel" name="name" type="text" placeholder="Enter bookmark name..." minlength="3">
         </div>
 
         <div class="form-field">
             <label for="url" class="form-label">URL</label>
             <input class="textbox" ngModel #textField="ngModel" name="url" type="url"
-                placeholder="e.g. https://wikipedia.com" required minlength="3">
-            <ng-container *ngIf="showValidationErrors && textField.invalid">
-                <p *ngIf="textField.errors?.required">Please enter some text for this bookmark.</p>
-                <p *ngIf="textField.errors?.minlength">The Todo text must be at least three characters</p>
-            </ng-container>
+                placeholder="e.g. https://wikipedia.org" required>
         </div>
 
         <div class="btns-container">
