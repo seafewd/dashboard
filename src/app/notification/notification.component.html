@@ -1,1 +1,5 @@
-<p>notification works!</p>
+<div class="notification" *ngFor="let n of notification" @notificationAnim>
+
+    {{ n.text }}
+
+</div>
