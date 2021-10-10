@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { fromEvent, Subscription } from 'rxjs';
 import { Bookmark } from './bookmark.model';
 
 @Injectable({
@@ -6,14 +7,23 @@ import { Bookmark } from './bookmark.model';
 })
 export class BookmarkService {
 
-  bookmarks: Bookmark[] = [
-    new Bookmark('Wikipedia', 'https://wikipedia.org'),
-    new Bookmark('YouTube', 'https://youtube.com'),
-    new Bookmark('Google', 'https://google.com'),
-    new Bookmark('DuckDuckGo', 'https://duckduckgo.com'),
-  ];
+  bookmarks: Bookmark[] = [];
 
-  constructor() { }
+  storageListenSub: Subscription;
+
+  constructor() {
+    this.loadState();
+
+    this.storageListenSub = fromEvent(window, 'storage')
+    .subscribe((event: StorageEventInit) => { // StorageEventInit -> StorageEvent???
+      if (event.key === 'bookmarks') this.loadState();
+    })
+  }
+
+  ngOnDestroy() {
+    if (this.storageListenSub)
+      this.storageListenSub.unsubscribe();
+  }
 
   getBookmarks() {
     return this.bookmarks;
@@ -25,17 +35,40 @@ export class BookmarkService {
 
   addBookmark(bookmark: Bookmark) {
     this.bookmarks.push(bookmark);
+    this.saveState();
   }
 
   updateBookmark(id: string, updatedFields: Partial<Bookmark>) {
     const bookmark = this.getBookmark(id);
     Object.assign(bookmark, updatedFields);
+    this.saveState();
   }
 
   deleteBookmark(id: string) {
     const bookmarkIndex = this.bookmarks.findIndex(b => b.id === id);
     if (bookmarkIndex == -1) return;
     this.bookmarks.splice(bookmarkIndex, 1);
+    this.saveState();
+  }
+
+  
+  saveState() {
+    localStorage.setItem('bookmarks', JSON.stringify(this.bookmarks));
+  }
+
+  loadState() {
+    try {
+      const bookmarksInStorage = JSON.parse(localStorage.getItem('bookmarks')!, (key, value) => {
+        if (key == 'url') return new URL(value);
+        return value;
+      });
+      // clear notes array while keeping the reference
+      this.bookmarks.length = 0;
+      this.bookmarks.push(...bookmarksInStorage);
+    } catch(e) {
+      console.log("There was an error retrieving the bookmarks from localStorage.");
+      console.log(e);
+    }
   }
 
 }
